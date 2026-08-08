@@ -11,19 +11,25 @@
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
 
     <!-- Header -->
+    <!-- Header -->
     <header class="bg-indigo-600 text-white py-6 shadow-md">
-        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <i class="fa-solid fa-hands-holding-child text-3xl"></i>
                 <div>
                     <h1 class="text-2xl font-bold tracking-wide">Sahaaya AI</h1>
                     <p class="text-xs text-indigo-200">AI-Powered Multilingual Digital Inclusion Assistant</p>
+                    <p class="text-xs text-indigo-100 font-medium mt-1">Developed by <span class="font-bold underline decoration-indigo-300">Preetha H</span></p>
                 </div>
             </div>
-            <span class="bg-indigo-700 text-indigo-100 text-xs px-3 py-1 rounded-full border border-indigo-500">Tamil • Tanglish • English</span>
+            <div class="flex flex-col items-end gap-1">
+                <span class="bg-indigo-700 text-indigo-100 text-xs px-3 py-1 rounded-full border border-indigo-500">Tamil • Tanglish • English</span>
+                <a href="mailto:preethahari1511@gmail.com" class="text-xs text-indigo-200 hover:text-white transition-colors flex items-center gap-1 mt-1">
+                    <i class="fa-solid fa-envelope text-xs"></i> preethahari1511@gmail.com
+                </a>
+            </div>
         </div>
     </header>
-
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-8">
         
@@ -305,5 +311,12 @@
             document.getElementById('loadingSpinner').classList.add('hidden');
         }
     </script>
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-16 text-xs text-center border-t border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 space-y-2">
+            <p>© 2026 Sahaaya AI. Developed by <span class="text-indigo-400 font-semibold">Preetha H</span>.</p>
+            <p>For services, collaborations, or inquiries: <a href="mailto:preethahari1511@gmail.com" class="text-indigo-300 hover:underline">preethahari1511@gmail.com</a></p>
+        </div>
+    </footer>
 </body>
 </html>
