@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahaaya AI – Multilingual Digital Inclusion Assistant</title>
+    <!-- Tailwind CSS CDN for modern UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white py-6 shadow-md">
+        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-hands-holding-child text-3xl"></i>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">Sahaaya AI</h1>
+                    <p class="text-xs text-indigo-200">AI-Powered Multilingual Digital Inclusion Assistant</p>
+                </div>
+            </div>
+            <span class="bg-indigo-700 text-indigo-100 text-xs px-3 py-1 rounded-full border border-indigo-500">Tamil • Tanglish • English</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Input Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+            <h2 class="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-file-arrow-up text-indigo-600"></i> Upload Notice or Enter Text
+            </h2>
+
+            <!-- Input Tabs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- File Upload Box -->
+                <div class="border-2 border-dashed border-indigo-200 rounded-xl p-6 text-center hover:border-indigo-500 transition-colors bg-indigo-50/30 flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-500 mb-2"></i>
+                    <p class="text-sm font-medium text-slate-600 mb-1">Upload Document Image / Bill</p>
+                    <p class="text-xs text-slate-400 mb-4">PNG, JPG, JPEG supported</p>
+                    
+                    <input type="file" id="documentInput" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                    <label for="documentInput" class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm py-2 px-5 rounded-lg transition-all shadow-sm">
+                        Select Image
+                    </label>
+                    <span id="fileNameDisplay" class="text-xs text-indigo-600 font-semibold mt-2 hidden"></span>
+                </div>
+
+                <!-- Text / Speech Box -->
+                <div class="flex flex-col">
+                    <div class="relative flex-grow">
+                        <textarea id="textInput" rows="4" class="w-full p-3 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none" placeholder="Or type/paste English notice text here..."></textarea>
+                        
+                        <!-- Mic Button for STT -->
+                        <button onclick="toggleVoiceInput()" id="micBtn" title="Speak Input" class="absolute right-3 bottom-3 bg-slate-100 hover:bg-indigo-100 text-indigo-600 p-2 rounded-full transition-all">
+                            <i class="fa-solid fa-microphone text-sm"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="processTextInput()" class="mt-3 w-full bg-slate-800 hover:bg-slate-900 text-white font-medium text-sm py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Text
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+            <p class="mt-3 text-sm font-medium text-slate-600">Extracting text & generating AI summary...</p>
+        </div>
+
+        <!-- Output Section -->
+        <div id="outputSection" class="hidden space-y-6">
+            
+            <!-- Urgent Banner / Doc Type Header -->
+            <div id="statusBanner" class="p-4 rounded-xl border flex items-center justify-between">
+                <div>
+                    <span id="docTypeTag" class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md"></span>
+                    <h3 id="docTitle" class="text-lg font-bold text-slate-800 mt-1"></h3>
+                </div>
+                <div id="urgencyBadge" class="text-xs font-semibold px-3 py-1 rounded-full"></div>
+            </div>
+
+            <!-- Key Details Grid -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">📌 Key Extracted Details</h4>
+                <ul id="keyDetailsList" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-700 font-medium"></ul>
+            </div>
+
+            <!-- Audio & Tanglish Explanation (Primary Focus) -->
+            <div class="bg-gradient-to-br from-indigo-900 to-indigo-800 text-white rounded-2xl p-6 shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-indigo-300"></i>
+                        <h4 class="font-bold text-indigo-100">Tanglish Voice & Text Explanation</h4>
+                    </div>
+                    <span class="text-xs bg-indigo-700 text-indigo-200 px-2.5 py-0.5 rounded-full">Easy to Understand</span>
+                </div>
+
+                <p id="tanglishSummary" class="text-base text-indigo-50 leading-relaxed mb-6 font-normal"></p>
+
+                <!-- Audio Player -->
+                <div class="bg-indigo-950/60 p-3 rounded-xl flex items-center gap-3 border border-indigo-700/50">
+                    <button id="playAudioBtn" onclick="playAudio()" class="w-10 h-10 bg-indigo-500 hover:bg-indigo-400 text-white rounded-full flex items-center justify-center transition-all">
+                        <i id="playIcon" class="fa-solid fa-play"></i>
+                    </button>
+                    <div class="flex-grow">
+                        <p class="text-xs text-indigo-200 font-medium">Listen to Tanglish Voice Explanation</p>
+                        <audio id="audioPlayer" class="hidden"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tamil & English Tabs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Tamil Summary -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🇮🇳 தமிழ் விளக்கம் (Tamil)</h4>
+                    <p id="tamilSummary" class="text-sm text-slate-700 leading-relaxed font-normal"></p>
+                </div>
+
+                <!-- English Summary -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🇬🇧 Simple English</h4>
+                    <p id="englishSummary" class="text-sm text-slate-700 leading-relaxed font-normal"></p>
+                </div>
+            </div>
+
+            <!-- Action Steps -->
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
+                <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> What You Need To Do Next
+                </h4>
+                <ol id="actionStepsList" class="space-y-2 text-sm text-emerald-950 font-medium list-decimal list-inside"></ol>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentAudioUrl = "";
+
+        // Handle File Upload
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileNameDisplay').innerText = `Selected: ${file.name}`;
+            document.getElementById('fileNameDisplay').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading();
+
+            try {
+                const response = await fetch('/upload-document', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    renderResult(result.data, result.audio_url);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Failed to process document.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Handle Plain Text Input
+        async function processTextInput() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('Please enter some text or upload an image.');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/process-text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    renderResult(result.data, result.audio_url);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Failed to process text.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Web Speech API for Speech-to-Text Input
+        function toggleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser. Try Google Chrome.");
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            
+            const micBtn = document.getElementById('micBtn');
+            micBtn.classList.add('animate-pulse', 'bg-red-100', 'text-red-600');
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('textInput').value = transcript;
+                micBtn.classList.remove('animate-pulse', 'bg-red-100', 'text-red-600');
+            };
+
+            recognition.onerror = function() {
+                micBtn.classList.remove('animate-pulse', 'bg-red-100', 'text-red-600');
+            };
+
+            recognition.start();
+        }
+
+        // Render API Response to UI
+        function renderResult(data, audioUrl) {
+            currentAudioUrl = audioUrl;
+            document.getElementById('audioPlayer').src = audioUrl;
+
+            // Header & Banner
+            document.getElementById('docTitle').innerText = data.doc_type || "Analyzed Document";
+            document.getElementById('docTypeTag').innerText = data.doc_type || "Notice";
+
+            const urgencyBadge = document.getElementById('urgencyBadge');
+            const statusBanner = document.getElementById('statusBanner');
+
+            if (data.urgency === 'High') {
+                urgencyBadge.innerText = 'High Urgency';
+                urgencyBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-700 border border-red-200';
+                statusBanner.className = 'p-4 rounded-xl border bg-red-50 border-red-200 flex items-center justify-between';
+            } else {
+                urgencyBadge.innerText = 'Normal / Info';
+                urgencyBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200';
+                statusBanner.className = 'p-4 rounded-xl border bg-blue-50 border-blue-200 flex items-center justify-between';
+            }
+
+            // Key Details
+            const keyDetailsList = document.getElementById('keyDetailsList');
+            keyDetailsList.innerHTML = '';
+            (data.key_details || []).forEach(detail => {
+                keyDetailsList.innerHTML += `<li class="flex items-center gap-2"><i class="fa-solid fa-angle-right text-indigo-500 text-xs"></i> ${detail}</li>`;
+            });
+
+            // Summaries
+            document.getElementById('tanglishSummary').innerText = data.tanglish_summary || '';
+            document.getElementById('tamilSummary').innerText = data.tamil_summary || '';
+            document.getElementById('englishSummary').innerText = data.english_summary || '';
+
+            // Action Steps
+            const actionStepsList = document.getElementById('actionStepsList');
+            actionStepsList.innerHTML = '';
+            (data.action_steps || []).forEach(step => {
+                actionStepsList.innerHTML += `<li>${step}</li>`;
+            });
+
+            document.getElementById('outputSection').classList.remove('hidden');
+        }
+
+        // Audio Playback Handler
+        function playAudio() {
+            const player = document.getElementById('audioPlayer');
+            const playIcon = document.getElementById('playIcon');
+
+            if (player.paused) {
+                player.play();
+                playIcon.className = 'fa-solid fa-pause';
+            } else {
+                player.pause();
+                playIcon.className = 'fa-solid fa-play';
+            }
+
+            player.onended = () => {
+                playIcon.className = 'fa-solid fa-play';
+            };
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('outputSection').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
